@@ -36,3 +36,48 @@
     transform: rotate(360deg);
   }
 }
+
+.main_container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 25px;
+  box-sizing: border-box;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0 20px;
+  width: 100%;
+}
+
+th {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  padding: 15px 20px;
+  box-sizing: border-box;
+  border-bottom: 3px solid #6a6a6a;
+  min-width: 220px;
+}
+
+.tbody_container {
+  overflow-y: auto;
+  max-height: 470px;
+  overflow-x: hidden;
+}
+
+.body_row .details {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.body_row td {
+  background-color: #ffffff;
+  padding: 20px;
+  text-align: center;
+  box-sizing: border-box;
+  min-width: 220px;
+}
