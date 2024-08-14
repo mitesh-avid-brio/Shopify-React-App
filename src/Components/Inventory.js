@@ -6,7 +6,40 @@ function Inventory () {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const baseUrl = '/admin/api/2024-07/products.json?limit=16'; // Base URL for requests
+    const baseUrl = '/admin/api/2024-07/products.json?limit=153'; // Adjust limit based on your needs
+
+    // without nexpage url
+    // useEffect(() => {
+    //     const getProducts = async () => {
+    //         try {
+    //             let allProducts = [];
+                
+    //             const resp = await fetch(baseUrl, {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     'X-Shopify-Access-Token': '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',
+    //                     'Content-Type': 'application/json'
+    //                 }
+    //             });
+
+    //             if (!resp.ok) {
+    //                 throw new Error(`HTTP error! status: ${resp.status}`);
+    //             }
+
+    //             const products = await resp.json();
+    //             allProducts = allProducts.concat(products.products);
+
+    //             setData(allProducts); // Set the combined product list
+    //             setLoading(false);
+    //         } 
+    //         catch (error) {
+    //             setError(error);
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     getProducts();
+    // }, []); // Empty dependency array ensures this runs only once
 
     useEffect(() => {
         const getProducts = async () => {
@@ -30,17 +63,25 @@ function Inventory () {
                     const products = await resp.json();
                     allProducts = allProducts.concat(products.products);
 
+
+                    // console.log("All", allProducts)
                     // Get the next page URL from the `link` header
                     const linkHeader = resp.headers.get('link');
-                    nextPageUrl = linkHeader
-                        ? linkHeader.match(/<([^>]+)>;\s*rel="next"/)?.[1] || null
-                        : null;
-                }
+                    if (linkHeader) {
+                        const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                        nextPageUrl = match ? match[1] : null;
+                    } else {
+                        nextPageUrl = null;
+                    }
+                        console.log("Next link", linkHeader)
+                        console.log("Fetching link", nextPageUrl)
+                    }
+
 
                 setData(allProducts); // Set the combined product list
                 setLoading(false);
-            } 
-            catch (error) {
+
+            } catch (error) {
                 setError(error);
                 setLoading(false);
             }
@@ -48,59 +89,62 @@ function Inventory () {
 
         getProducts();
     }, []); // Empty dependency array ensures this runs only once
-
-    console.log("Products", data)
+    
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
 
-    const product_inverntory= data
+    // Start id from 1 and increment by 1 for each product
+    const product_inverntory = data.map((item, index) => ({
+        ...item,
+        id: index + 1 // Start id from 1 and increment by 1
+    }));
     
-    // [
-    //     {id:"01",title:"Bike",price:'50$',variants:"Blue"},
-    //     {id:"02",title:"Car",price:'150$',variants:"Black"},
-    // ]
-
-    
-    console.log("Product Inventory", product_inverntory)
-
+    // console.log("Product Inventory", product_inverntory)
     return (
         <div className="main_container">
-            <h2 className='heading'>Shopify Panel</h2>
+            <h2 className='heading'>Products Inventory</h2>
+            <h4 className="total">Total Products: {product_inverntory.length}</h4>
 
-                    <div className="table_data">
+                    <div className="table_data" style={{height: '800px'}}>
                         <table className="table">
                             <thead className='table_head'>
                                 <tr>
                                     <th>Id</th>
                                     <th>Title</th>
-                                    <th>Variant & Price</th>
+                                    <th>Variants (Size -- Color -- Material)</th>
+                                    <th>Stock</th>
                                     <th>Status</th>
-                                    {/* <th>Action</th> */}
                                 </tr>
                             </thead>
-                        </table>
 
-                        <div className="tbody_container">
-                            <table>
-                                <tbody>
-                                    {product_inverntory.map((item)=>(
-                                        <tr className='body_row' key={item.id}>
+                            <tbody>
+                                {product_inverntory.map((item)=>(
+                                    <tr className='body_row' key={item.id}>
                                         <td className='index' data-label="index">{item?.id}</td>
-                                        <td className='details' data-label="title">{item?.title}</td>
+                                        <td className='details' data-label="title">{item?.title ? item?.title : "N.A" }</td>
                                         <td className='details' data-label="variant">
                                             <ul>
-                                                {item?.variants?.map((variant) => (
-                                                    <li>{variant.title} {variant.price}</li>
+                                                {item?.variants?.map((variant, index) => (
+                                                    <li key={index}>
+                                                         {variant.option1 ? variant.option1 : "N.A"} -- 
+                                                         {variant.option2 ? variant.option2 : "N.A"} -- 
+                                                         {variant.option3 ? variant.option3 : "N.A"}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </td>
+                                        <td className='details' data-label="variant_stock">
+                                            <ul>
+                                                {item?.variants?.map((variant, index) => (
+                                                    <li key={index}>{variant.inventory_quantity}</li>
                                                 ))}
                                             </ul>
                                         </td>
                                         <td className='details' data-label="variant">{item?.status}</td>
-                                        {/* <td className='details' data-label="action"> </td> */}
                                     </tr>)) }
-                                </tbody>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
         </div>
     )

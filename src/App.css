@@ -2,6 +2,24 @@
   text-align: center;
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); /* Change color and opacity */
+  background-image: url(./logo.webp);
+  background-repeat: no-repeat;
+  background-position: right center;
+  width: 100%;
+}
+
+.content {
+  position: relative; /* Keep content on top of the overlay */
+  z-index: 1; /* Ensure content is above the overlay */
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -44,10 +62,61 @@
   box-sizing: border-box;
 }
 
+.title {
+  font-size: 40px;
+  line-height: 50px;
+  margin-bottom: 40px;
+  color: #ffffff;
+  position: relative;
+}
+
+.heading {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 38px;
+  color: #ffffff;
+}
+
+.total {
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+.button_container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+}
+
+.buttons {
+  display: inline-block;
+  text-decoration: none;
+  border: 1px solid #6a6a6a;
+  border-radius: 10px;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  background-color: #f2f2f2;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  color: #000000;
+}
+
+.buttons:hover {
+  background-color: #e2e2e2;
+}
+
 table {
   border-collapse: separate;
-  border-spacing: 0 20px;
+  border-spacing: 0;
   width: 100%;
+}
+
+.table_head {
+  background-color: #000000;
+  color: #fff;
 }
 
 th {
@@ -57,14 +126,19 @@ th {
   line-height: 22px;
   padding: 15px 20px;
   box-sizing: border-box;
-  border-bottom: 3px solid #6a6a6a;
   min-width: 220px;
 }
 
 .tbody_container {
   overflow-y: auto;
-  max-height: 470px;
+  max-height: 700px;
   overflow-x: hidden;
+}
+
+.table_data {
+  width: 100%;
+  border: 1px solid #000000;
+  overflow: auto;
 }
 
 .body_row .details {
@@ -74,10 +148,27 @@ th {
   cursor: pointer;
 }
 
-.body_row td {
+tbody tr:nth-child(odd) {
   background-color: #ffffff;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.body_row td {
   padding: 20px;
   text-align: center;
   box-sizing: border-box;
   min-width: 220px;
+  /* border-bottom: 1px solid #6a6a6a; */
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style-type: none;
 }
