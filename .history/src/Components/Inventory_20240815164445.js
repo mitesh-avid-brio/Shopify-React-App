@@ -66,7 +66,7 @@ function Inventory () {
                 if (linkHeader) {
                     const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
                     if (nextLinkMatch && nextLinkMatch[1]) {
-                        setLink(nextLinkMatch[1]);
+                        setNextPageUrl(nextLinkMatch[1]);
                     }
                 }
     
@@ -83,7 +83,6 @@ function Inventory () {
         if (!link) return;
     
         try {
-            console.log("Hello", link)
             const resp = await fetch(link, {
                 method: 'GET',
                 headers: {
@@ -91,27 +90,26 @@ function Inventory () {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(resp)
+    
             if (!resp.ok) {
                 throw new Error(`HTTP error! status: ${resp.status}`);
             }
     
             const products = await resp.json();
-            console.log(products)
-            // setData(prevData => [...prevData, ...products.products]);
+            setData(prevData => [...prevData, ...products.products]);
     
             // Extract the next page URL for further pagination
-            // const linkHeader = resp.headers.get('Link');
-            // if (linkHeader) {
-            //     const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
-            //     if (nextLinkMatch && nextLinkMatch[1]) {
-            //         setLink(nextLinkMatch[1]);
-            //     } else {
-            //         setLink(null); // No more pages
-            //     }
-            // } else {
-            //     setLink(null); // No pagination link
-            // }
+            const linkHeader = resp.headers.get('Link');
+            if (linkHeader) {
+                const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                if (nextLinkMatch && nextLinkMatch[1]) {
+                    setLink(nextLinkMatch[1]);
+                } else {
+                    setLink(null); // No more pages
+                }
+            } else {
+                setLink(null); // No pagination link
+            }
     
         } catch (error) {
             setError(error);

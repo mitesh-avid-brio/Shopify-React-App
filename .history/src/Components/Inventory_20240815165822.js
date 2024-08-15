@@ -89,6 +89,10 @@ function Inventory () {
                 headers: {
                     'X-Shopify-Access-Token': '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',
                     'Content-Type': 'application/json'
+                    'type': 'GET',
+                    dataType: 'json',
+                    crossDomain: true,
+                    contentType: "json",
                 }
             });
             console.log(resp)

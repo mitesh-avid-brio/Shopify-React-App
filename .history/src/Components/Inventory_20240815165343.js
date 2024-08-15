@@ -91,7 +91,7 @@ function Inventory () {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(resp)
+            console.log()
             if (!resp.ok) {
                 throw new Error(`HTTP error! status: ${resp.status}`);
             }

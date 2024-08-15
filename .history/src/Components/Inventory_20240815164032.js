@@ -45,73 +45,85 @@ function Inventory () {
     useEffect(() => {
         const getProducts = async () => {
             try {
-                const resp = await fetch(baseUrl, {
-                    method: 'GET',
-                    headers: {
-                        'X-Shopify-Access-Token': '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',
-                        'Content-Type': 'application/json'
+                let allProducts = [];
+                let nextPageUrl = baseUrl;
+
+                while (nextPageUrl) {
+                    const resp = await fetch(nextPageUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-Shopify-Access-Token': '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',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!resp.ok) {
+                        throw new Error(`HTTP error! status: ${resp.status}`);
                     }
-                });
-    
-                if (!resp.ok) {
-                    throw new Error(`HTTP error! status: ${resp.status}`);
-                }
-    
-                const products = await resp.json();
-                setData(products.products); // Assuming the API returns an array of products
+
+                    const products = await resp.json();
+                    allProducts = allProducts.concat(products.products);
+
+
+                    // console.log("All", allProducts)
+                    // Get the next page URL from the `link` header
+                    console.log("test",resp.headers.get('link'))
+                    const linkHeader = resp.headers.get('link');
+                    if (linkHeader) {
+                        const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                        console.log("match", match)
+                        setLink(match ? match[1] : null)
+                    } else {
+                        setLink(null);
+                    }
+                        console.log("Next link", linkHeader)
+                        console.log("Fetching link", nextPageUrl)
+                    }
+
+
+                setData(allProducts); // Set the combined product list
                 setLoading(false);
-    
-                // Extract the next page URL from the Link header
-                const linkHeader = resp.headers.get('Link');
-                if (linkHeader) {
-                    const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
-                    if (nextLinkMatch && nextLinkMatch[1]) {
-                        setLink(nextLinkMatch[1]);
-                    }
-                }
-    
+
             } catch (error) {
                 setError(error);
                 setLoading(false);
             }
         };
-    
+
         getProducts();
     }, []); // Empty dependency array ensures this runs only once
 
     const fetchNextPage = async () => {
-        if (!link) return;
+        if (!nextPageUrl) return;
     
         try {
-            console.log("Hello", link)
-            const resp = await fetch(link, {
+            const resp = await fetch(nextPageUrl, {
                 method: 'GET',
                 headers: {
                     'X-Shopify-Access-Token': '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',
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(resp)
+    
             if (!resp.ok) {
                 throw new Error(`HTTP error! status: ${resp.status}`);
             }
     
             const products = await resp.json();
-            console.log(products)
-            // setData(prevData => [...prevData, ...products.products]);
+            setData(prevData => [...prevData, ...products.products]);
     
             // Extract the next page URL for further pagination
-            // const linkHeader = resp.headers.get('Link');
-            // if (linkHeader) {
-            //     const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
-            //     if (nextLinkMatch && nextLinkMatch[1]) {
-            //         setLink(nextLinkMatch[1]);
-            //     } else {
-            //         setLink(null); // No more pages
-            //     }
-            // } else {
-            //     setLink(null); // No pagination link
-            // }
+            const linkHeader = resp.headers.get('Link');
+            if (linkHeader) {
+                const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                if (nextLinkMatch && nextLinkMatch[1]) {
+                    setLink(nextLinkMatch[1]);
+                } else {
+                    setLink(null); // No more pages
+                }
+            } else {
+                setNextPageUrl(null); // No pagination link
+            }
     
         } catch (error) {
             setError(error);
@@ -174,7 +186,6 @@ function Inventory () {
                                     </tr>)) }
                             </tbody>
                         </table>
-                        <button onClick={fetchNextPage}>Load More</button>
                     </div>
         </div>
     )

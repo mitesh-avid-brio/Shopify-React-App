@@ -91,14 +91,14 @@ function Inventory () {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(resp)
+    
             if (!resp.ok) {
                 throw new Error(`HTTP error! status: ${resp.status}`);
             }
     
             const products = await resp.json();
             console.log(products)
-            // setData(prevData => [...prevData, ...products.products]);
+            setData(prevData => [...prevData, ...products.products]);
     
             // Extract the next page URL for further pagination
             // const linkHeader = resp.headers.get('Link');
