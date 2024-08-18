@@ -18,7 +18,7 @@ function App() {
                         <Link to="/inventory" className='buttons'> Products </Link>
                     </li>
                     <li>
-                        <Link to="/customer" className='buttons'> Customer </Link>
+                        <Link to="/customer" className='buttons'> Customers </Link>
                     </li>
                     <li>
                         <Link to="/order" className='buttons'> Orders </Link>

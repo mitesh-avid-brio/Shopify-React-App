@@ -5,49 +5,86 @@ function Customers () {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [link, setLink] = useState('');
 
-    const baseUrl = '/admin/api/2024-07/customers.json'; // Base URL for requests
+    const baseUrl = '/admin/api/2024-07/customers.json?limit=250'; // Base URL for requests
 
     useEffect(() => {
         const getCustomers = async () => {
-            try {
-                let allCustomers = [];
-                let nextPageUrl = baseUrl;
-
-                while (nextPageUrl) {
-                    const resp = await fetch(nextPageUrl, {
-                        method: 'GET',
-                        headers: {
-                            'X-Shopify-Access-Token': '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',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (!resp.ok) {
-                        throw new Error(`HTTP error! status: ${resp.status}`);
-                    }
-
-                    const customers = await resp.json();
-                    allCustomers = allCustomers.concat(customers.customers);
-
-                    // Get the next page URL from the `link` header
-                    const linkHeader = resp.headers.get('link');
-                    nextPageUrl = linkHeader
-                        ? linkHeader.match(/<([^>]+)>;\s*rel="next"/)?.[1] || null
-                        : null;
-                }
-
-                setData(allCustomers); // Set the combined product list
-                setLoading(false);
-            } 
-            catch (error) {
-                setError(error);
-                setLoading(false);
+          try {
+            const resp = await fetch(baseUrl, {
+              method: 'GET',
+              headers: {
+                'X-Shopify-Access-Token': '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',
+                'Content-Type': 'application/json'
+              }
+            });
+      
+            if (!resp.ok) {
+              throw new Error(`HTTP error! status: ${resp.status}`);
             }
+      
+            const customers = await resp.json();
+            setData(customers.customers);
+            setLoading(false);
+      
+            const linkHeader = resp.headers.get('Link');
+            if (linkHeader) {
+              const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+              if (nextLinkMatch && nextLinkMatch[1]) {
+                setLink(nextLinkMatch[1]);
+              }
+            }
+          } catch (error) {
+            setError(error);
+            setLoading(false);
+          }
         };
-
+      
         getCustomers();
-    }, []); // Empty dependency array ensures this runs only once
+      }, []); // Empty dependency array ensures this runs only once
+      
+      const fetchNextPage = async () => {
+          if (!link) return;
+      
+          try {
+              // Strip out the domain to ensure it goes through the proxy
+              const relativeLink = link.replace('https://pakt-shirts.myshopify.com', '');
+      
+              console.log("Fetching from relative link:", relativeLink);
+      
+              const resp = await fetch(relativeLink, {
+                  method: 'GET',
+                  headers: {
+                      'X-Shopify-Access-Token': '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',
+                      'Content-Type': 'application/json'
+                  }
+              });
+      
+              if (!resp.ok) {
+                  throw new Error(`HTTP error! status: ${resp.status}, statusText: ${resp.statusText}`);
+              }
+      
+              const customers = await resp.json();
+              setData(prevData => [...prevData, ...customers.customers]);
+              
+      
+              // Handle pagination link for the next page
+              const linkHeader = resp.headers.get('Link');
+              if (linkHeader) {
+                  const nextLinkMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                  if (nextLinkMatch && nextLinkMatch[1]) {
+                      setLink(nextLinkMatch[1].replace('https://pakt-shirts.myshopify.com', ''));
+                  } else {
+                      setLink(null); // No more pages
+                  }
+              }
+      
+          } catch (error) {
+              console.error("Fetch error:", error.message);
+              setError(error);
+          }
+      };
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
@@ -69,8 +106,7 @@ function Customers () {
                                 <tr>
                                     <th>Id</th>
                                     <th>Customer Id</th>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
+                                    <th>Name</th>
                                     <th>Email</th>
                                     <th>Created At</th>
                                     <th>Total Orders</th>
@@ -87,8 +123,7 @@ function Customers () {
                                     <tr className='body_row' key={customer.index_id}>
                                         <td className='index' data-label="index">{customer?.index_id}</td>
                                         <td className='details' data-label="customer_id">{customer?.id ? customer?.id  : "N.A"}</td>
-                                        <td className='details' data-label="first_name">{customer?.first_name ? customer?.first_name  : "N.A"}</td>
-                                        <td className='details' data-label="last_name">{customer?.last_name ? customer?.last_name  : "N.A"}</td>
+                                        <td className='details' data-label="first_name">{customer?.first_name ? customer?.first_name  : "N.A"} {customer?.last_name ? customer?.last_name  : "N.A"}</td>
                                         <td className='details' data-label="email">{customer?.email ? customer?.email  : "N.A"}</td>
                                         <td className='details' data-label="created_at">{customer?.created_at ? customer?.created_at  : "N.A"}</td>
                                         <td className='details' data-label="orders_count">{customer?.orders_count ? customer?.orders_count  : "N.A"}</td>
@@ -114,6 +149,12 @@ function Customers () {
                             </tbody>
                         </table>
                     </div>
+
+                    {customer_list.length >= 250 && link && (
+                        <div className="load_more">
+                            <button className="buttons" onClick={fetchNextPage}>Load More</button>
+                        </div>
+                    )}
         </div>
     )
 }
@@ -121,10 +162,4 @@ function Customers () {
 export default Customers;
 
 
-
-
-
-// access token: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
-// api key: aec14829c6068d3c7209b0fb1c99cfa1
-// api secret: ec53dbafa6a84fc722a14565b63e397e
-// https://pakt-shirts.myshopify.com/
+// search thru customer name

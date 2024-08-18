@@ -70,6 +70,13 @@
   position: relative;
 }
 
+.container_block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
 .heading {
   font-size: 30px;
   font-weight: 700;
@@ -81,6 +88,7 @@
   color: #ffffff;
   font-size: 20px;
   line-height: 26px;
+  margin: 0;
 }
 
 .button_container {
@@ -102,6 +110,7 @@
   font-weight: 600;
   line-height: 28px;
   color: #000000;
+  cursor: pointer;
 }
 
 .buttons:hover {
@@ -137,7 +146,6 @@ th {
 
 .table_data {
   width: 100%;
-  border: 1px solid #000000;
   overflow: auto;
 }
 
@@ -171,4 +179,9 @@ ul {
 
 li {
   list-style-type: none;
+}
+
+.load_more {
+  text-align: right;
+  margin: 15px 0;
 }
