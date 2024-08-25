@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import Checkbox from "react-custom-checkbox";
+import { exportToCSV } from "../utils/exportCSV";
 
 
-function Inventory () {
+function Inventory ({ searchQuery }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [link, setLink] = useState('');
-    const [searchQuery, setSearchQuery] = useState(''); // State for the search query
     const [lowStockChecked, setLowStockChecked] = useState(false);
+    const [draftProduct, setDraftProduct] = useState(false);
 
 
     const LOW_STOCK_THRESHOLD = 3; // Consider products with stock below 5 as low stock
@@ -17,7 +18,6 @@ function Inventory () {
     useEffect(() => {
       const getProducts = async () => {
         try {
-            console.log("1st link", baseUrl);
           const resp = await fetch(baseUrl, {
             method: 'GET',
             headers: {
@@ -33,6 +33,7 @@ function Inventory () {
           const products = await resp.json();
           setData(products.products);
           setLoading(false);
+          
     
           const linkHeader = resp.headers.get('Link');
           if (linkHeader) {
@@ -50,14 +51,55 @@ function Inventory () {
       getProducts();
     }, []); // Empty dependency array ensures this runs only once
     
+       
+    const product_inventory = data;
+
+    // Filter products based on both the search query and low stock checkbox
+    const filteredProducts = product_inventory.filter(item => {
+        const matchesQuery = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const isActive = item.status === "active";
+        const isDraft = item.status === "draft";
+        const hasLowStock = item.variants.every(variant => variant.inventory_quantity < LOW_STOCK_THRESHOLD);
+        
+        if (draftProduct && lowStockChecked) {
+            return matchesQuery && isDraft && hasLowStock;
+        }
+        else if (draftProduct) {
+            return matchesQuery && isDraft && hasLowStock;
+        }
+        else if (lowStockChecked) {
+            return matchesQuery && hasLowStock && isActive;
+        }
+    
+        return matchesQuery && isActive;
+    }).map((item, index) => ({
+        ...item,
+        id: index + 1 // Start id from 1 and increment by 1
+    }));
+
+    const handleExport = () => {
+        // Convert filtered products to a format suitable for CSV
+        const exportData = filteredProducts.map((product) => ({
+            ID: product.id,
+            Title: product.title,
+            // Vraint: product.variants.map((varr) => `${varr.option1} -- ${varr.option2} -- ${varr.option3}`).join(", "),
+            Size: product.variants.map((varr) => varr.option1).join(", "),
+            Color: product.variants.map((varr) => varr.option2).join(", "),
+            Material: product.variants.map((varr) => varr.option3).join(", "),
+            Stock: product.variants.map((varr) => varr.inventory_quantity).join(", "),
+            Status: product.status
+        }));
+    
+        exportToCSV(exportData, "inventory.csv");
+      };
+      
+
     const fetchNextPage = async () => {
         if (!link) return;
     
         try {
             // Strip out the domain to ensure it goes through the proxy
             const relativeLink = link.replace('https://pakt-shirts.myshopify.com', '');
-    
-            console.log("Fetching from relative link:", relativeLink);
     
             const resp = await fetch(relativeLink, {
                 method: 'GET',
@@ -95,30 +137,10 @@ function Inventory () {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
 
-    // Start id from 1 and increment by 1 for each product
-    const product_inventory = data.map((item, index) => ({
-        ...item,
-        id: index + 1 // Start id from 1 and increment by 1
-    }));
 
-    // Filter products based on both the search query and low stock checkbox
-    const filteredProducts = product_inventory.filter(item => {
-        const matchesQuery = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    
-        if (lowStockChecked) {
-        // Check if any of the product variants have inventory below the threshold
-        const hasLowStock = item.variants.some(variant => variant.inventory_quantity < LOW_STOCK_THRESHOLD);
-        return matchesQuery && hasLowStock;
-        }
-    
-        return matchesQuery;
-    });
-  
-    
-    // console.log("Product Inventory", product_inventory)
     return (
         <div className="main_container">
-            <h2 className='heading'>Products Inventory</h2>
+            <h2 className='heading'>Product Details</h2>
 
             <div className="container_block">
                 <Checkbox
@@ -126,20 +148,22 @@ function Inventory () {
                     checked={lowStockChecked}
                     borderColor="#D7C629"
                     style={{ cursor: "pointer" }}
-                    labelStyle={{ marginLeft: 5, userSelect: "none" }}
-                    label="Low Stock Products"
+                    labelStyle={{ marginLeft: 5, userSelect: "none", fontSize: "20px", lineHeight: "26px", color: "#ffffff", fontWeight: "600" }}
+                    label="Low Stock Products (<3)"
                     onChange={() => setLowStockChecked(!lowStockChecked)}
+                />
+                <Checkbox
+                    name="my-input"
+                    checked={draftProduct}
+                    borderColor="#D7C629"
+                    style={{ cursor: "pointer" }}
+                    labelStyle={{ marginLeft: 5, userSelect: "none", fontSize: "20px", lineHeight: "26px", color: "#ffffff", fontWeight: "600" }}
+                    label="Show Draft Products"
+                    onChange={() => setDraftProduct(!draftProduct)}
                 />
                 <h4 className="total">Total Products: {filteredProducts.length}</h4>
 
-                <div className="search_bar">
-                    <input
-                        type="text"
-                        placeholder="Search by product title..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
+                <button className="buttons" onClick={handleExport}>Export Customers</button>
             </div>
 
                     <div className="table_data" style={{maxHeight: '750px', height: 'auto'}}>

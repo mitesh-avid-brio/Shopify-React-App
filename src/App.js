@@ -1,16 +1,25 @@
 import './App.css';
+import { useState } from 'react';
 import {BrowserRouter as Router, Route, Routes, Link} from 'react-router-dom';
 import Inventory from './Components/Inventory'
 import Customer from './Components/Customers'
+import Search from './Components/Search'
 import Orders from './Components/Orders'
 
 
 
 function App() {
+  const [searchQuery, setSearchQuery] = useState('');
   return (
     <div className="App">
        <div className="overlay"></div>
-      <h1 className='title'>Shopify Store Admin Panel</h1>
+       <div className='header'>
+          <h1 className='title'>Shopify Store Admin Panel</h1>
+          <div className='right_side'>
+            <button className='buttons'>Export</button>
+            <Search onSearch={(query) => setSearchQuery(query)} />
+          </div>
+       </div>
       <div className='content'>
         <Router>
                 <ul className='button_container'>
@@ -25,11 +34,12 @@ function App() {
                     </li>
                 </ul>
                 <Routes>
-                    <Route path="/inventory" exact element={<Inventory />} />
-                    <Route path="/customer" exact element={<Customer />} />
-                    <Route path="/order" exact element={<Orders />} />
+                    <Route path="/inventory" exact element={<Inventory searchQuery={searchQuery}/>} />
+                    <Route path="/customer" exact element={<Customer searchQuery={searchQuery}/>} />
+                    <Route path="/order" exact element={<Orders searchQuery={searchQuery}/>} />
                 </Routes>
         </Router>
+
       </div>
     </div>
   );

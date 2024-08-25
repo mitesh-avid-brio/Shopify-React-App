@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 25px;
+  box-sizing: border-box;
 }
 
 .overlay {
@@ -76,6 +80,7 @@
   align-items: center;
   margin: 10px 0;
 }
+
 
 .heading {
   font-size: 30px;
@@ -184,4 +189,36 @@ li {
 .load_more {
   text-align: right;
   margin: 15px 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right_side {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.right_side .buttons {
+  position: relative;
+}
+
+.right_side .search_bar {
+  position: relative;
+}
+
+.right_side .search_bar input {
+  padding: 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+  border: 0;
+}
+
+.search_bar input:focus-visible {
+  outline: 0;
 }
