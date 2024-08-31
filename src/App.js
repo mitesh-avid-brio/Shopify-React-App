@@ -15,10 +15,7 @@ function App() {
        <div className="overlay"></div>
        <div className='header'>
           <h1 className='title'>Shopify Store Admin Panel</h1>
-          <div className='right_side'>
-            <button className='buttons'>Export</button>
             <Search onSearch={(query) => setSearchQuery(query)} />
-          </div>
        </div>
       <div className='content'>
         <Router>

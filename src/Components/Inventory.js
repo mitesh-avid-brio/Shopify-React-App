@@ -139,7 +139,7 @@ function Inventory ({ searchQuery }) {
 
 
     return (
-        <div className="main_container">
+        <div className="inventory">
             <h2 className='heading'>Product Details</h2>
 
             <div className="container_block">
@@ -148,8 +148,8 @@ function Inventory ({ searchQuery }) {
                     checked={lowStockChecked}
                     borderColor="#D7C629"
                     style={{ cursor: "pointer" }}
-                    labelStyle={{ marginLeft: 5, userSelect: "none", fontSize: "20px", lineHeight: "26px", color: "#ffffff", fontWeight: "600" }}
                     label="Low Stock Products (<3)"
+                    className="labell"
                     onChange={() => setLowStockChecked(!lowStockChecked)}
                 />
                 <Checkbox
@@ -157,7 +157,6 @@ function Inventory ({ searchQuery }) {
                     checked={draftProduct}
                     borderColor="#D7C629"
                     style={{ cursor: "pointer" }}
-                    labelStyle={{ marginLeft: 5, userSelect: "none", fontSize: "20px", lineHeight: "26px", color: "#ffffff", fontWeight: "600" }}
                     label="Show Draft Products"
                     onChange={() => setDraftProduct(!draftProduct)}
                 />

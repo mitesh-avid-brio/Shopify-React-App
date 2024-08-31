@@ -128,7 +128,7 @@ function Customers ({searchQuery}) {
       };
     
     return (
-        <div className="main_container customers">
+        <div className="customers">
             <h2 className='heading'>Customers Details</h2>
             
             <div className="container_block">

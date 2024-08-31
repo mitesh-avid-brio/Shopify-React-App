@@ -130,7 +130,7 @@ function Orders ({searchQuery}) {
 
     return (
         <>
-            <div className="main_container orders">
+            <div className="orders">
                 <h2 className='heading'>Order Details</h2>
                 
             <div className="container_block">
