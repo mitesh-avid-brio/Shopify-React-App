@@ -215,6 +215,14 @@ li {
   font-weight: 600;
 }
 
+.faq {
+  /* position: absolute;
+  left: 20px;
+  bottom: 20px;
+  cursor: pointer; */
+  position: relative;
+}
+
 
 @media screen and (max-width: 320px) {
   body {
